@@ -1,2 +1,2 @@
 # Guessing-game-with-C-programming-
-Guessing game (with C programming)
+This is a guessing game. A random number is generated and the user has to guess the number. Hints are given when the user gets close to the number. The user enters their number using the keypad connected to the MBED board and information on the game is displayed on the LCD. The aim of the game is for the user to guess the number in the fewest attempt. The lower the number of guesses, the higher the score.
