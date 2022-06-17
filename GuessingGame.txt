@@ -1,0 +1,312 @@
+/**
+ * This is a demo which uses the ST DISCO_F413ZH LCD and touch screen
+ * Contains a FRIDA FRD154BP2901 LCD display
+ * Code tested using MBED online simulator https://simulator.mbed.com/
+ */
+
+#include "mbed.h"
+#include "stm32f413h_discovery_ts.h"
+#include "stm32f413h_discovery_lcd.h"
+#include "C12832.h"
+
+C12832 lcd(SPI_MOSI, SPI_SCK, SPI_MISO, p8, p11);
+
+TS_StateTypeDef TS_State = { 0 };
+
+int within(int value,int goal,int n){
+    int diff = value - goal;
+    
+    if(-n<=diff && n<=diff){
+        return 1;
+    }
+    
+    else{
+        return 0;
+    }
+}
+
+
+int main() {
+
+    BSP_LCD_Init();
+
+    /* Touchscreen initialization */
+    if (BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize()) == TS_ERROR) {
+        printf("BSP_TS_Init error\n");
+    }
+
+    /* Clear the LCD */
+    BSP_LCD_Clear(LCD_COLOR_WHITE);
+
+    /* Set Touchscreen Demo1 description */
+    BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+    BSP_LCD_DrawRect(0, 0, 239, 239);
+    BSP_LCD_DrawRect(0, 60, 239, 239);
+    BSP_LCD_DrawRect(0, 120, 239, 239);
+    BSP_LCD_DrawRect(0, 180, 239, 239);
+    BSP_LCD_DrawRect(0, 239, 239, 239);
+    BSP_LCD_DrawRect(60, 0, 239, 239);
+    BSP_LCD_DrawRect(120, 0, 239, 239);
+    BSP_LCD_DrawRect(180, 0, 239, 239);
+    BSP_LCD_DrawRect(240, 0, 239, 239);
+    BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+    BSP_LCD_DisplayChar(20, 20, '1');
+    BSP_LCD_DisplayChar(80, 20, '2');
+    BSP_LCD_DisplayChar(140, 20, '3');
+    BSP_LCD_DisplayChar(200, 20, 'F');
+    BSP_LCD_DisplayChar(20, 80, '4');
+    BSP_LCD_DisplayChar(80, 80, '5');
+    BSP_LCD_DisplayChar(140, 80, '6');
+    BSP_LCD_DisplayChar(200, 80, 'E');
+    BSP_LCD_DisplayChar(20, 140, '7');
+    BSP_LCD_DisplayChar(80, 140, '8');
+    BSP_LCD_DisplayChar(140, 140, '9');
+    BSP_LCD_DisplayChar(200, 140, 'D');
+    BSP_LCD_DisplayChar(20, 200, 'A');
+    BSP_LCD_DisplayChar(80, 200, '0');
+    BSP_LCD_DisplayChar(140, 200, 'B');
+    BSP_LCD_DisplayChar(200, 200, 'C');
+    BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+    BSP_LCD_SetBackColor(LCD_COLOR_GREEN);
+    BSP_LCD_SetFont(&Font16);
+
+    char keytable [] = {'1','2','3','F','4','5','6','E',
+                        '7','8','9','D','A','0','B','C'};
+                        
+    char letters [] = {'A','B','D','E','F'};
+    
+    char userNumber[20];
+    int randNo;
+    int n;
+    int score = 0;
+    
+    time_t t;
+    srand((unsigned) time(&t));
+    randNo = rand() % 31;
+    
+    
+    lcd.locate(1,1);
+    lcd.printf("%s%d","The secret number is ",randNo);
+    
+    int i = 1;
+    int j = 0;
+    
+    printf("Hello, this is a guessing game.\nEnter any number between 0 and 30 and see if you can guess my randomly generated number correctly.\n");
+    printf("I will give you hints along the way.\n");
+    printf("Guess using the keypad: \n");
+    while (1) {
+        BSP_TS_GetState(&TS_State);
+            
+        if(TS_State.touchDetected) {
+            
+            /* One or dual touch have been detected          */
+
+            /* Get X and Y position of the first touch post calibrated */
+            uint16_t x1 = TS_State.touchX[0];
+            uint16_t y1 = TS_State.touchY[0];
+            wait_ms(10);
+            
+            if(x1 <= 60 && y1 <= 60){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[0]);
+                userNumber[j] = keytable[0];
+            }
+                
+            else if((x1 > 60 && x1 <= 120) && (y1 < 60)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[1]);
+                userNumber[j] = keytable[1];
+            }
+                
+            else if((x1 > 120 && x1 <= 180) && (y1 < 60)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[2]);
+                userNumber[j] = keytable[2];
+            }
+            
+            else if((x1 > 180 && x1 <= 240) && (y1 < 60)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[3]);
+                userNumber[j] = keytable[3];
+            }
+            
+            else if((x1 <= 60) && (y1 > 60 && y1 <= 120)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[4]);
+                userNumber[j] = keytable[4];
+            }
+            
+            else if((x1 > 60 && x1 <= 120) && (y1 > 60 && y1 <= 120)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[5]);
+                userNumber[j] = keytable[5];
+                
+            } 
+            
+            else if((x1 > 120 && x1 <= 180) && (y1 > 60 && y1 <= 120)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[6]);
+                userNumber[j] = keytable[6];
+                
+            }    
+            
+            else if((x1 > 180 && x1 <= 240) && (y1 > 60 && y1 <= 120)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[7]);
+                userNumber[j] = keytable[7];
+                
+            }
+            
+            else if((x1 <= 60) && (y1 > 120 && y1 <= 180)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[8]);
+                userNumber[j] = keytable[8];
+                
+            }
+            
+            else if((x1 > 60 && x1 <= 120 ) && (y1 > 120 && y1 <= 180)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[9]);
+                userNumber[j] = keytable[9];
+            }
+            
+            else if((x1 > 120 && x1 <= 180 ) && (y1 > 120 && y1 <= 180)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[10]);
+                userNumber[j] = keytable[10];
+                
+            }
+            
+            else if((x1 > 180 && x1 <= 240 ) && (y1 > 120 && y1 <= 180)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[11]);
+                userNumber[j] = keytable[11];
+                
+            }
+            
+            else if((x1 <= 60 ) && (y1 > 180 && y1 <= 240)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[12]);
+                userNumber[j] = keytable[12];
+                
+            }
+            
+            else if((x1 > 60 && x1 <= 120 ) && (y1 > 180 && y1 <= 240)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[13]);
+                userNumber[j] = keytable[13];
+                
+            }
+            
+            else if((x1 > 120 && x1 <= 180 ) && (y1 > 180 && y1 <= 240)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[14]);
+                userNumber[j] = keytable[14];
+                
+            }
+            
+            else if((x1 > 180 && x1 <= 240 ) && (y1 > 180 && y1 <= 240)){
+                lcd.locate(i,13);
+                lcd.printf("%c",keytable[15]);
+                wait_ms(100);
+                lcd.cls();
+                lcd.locate(1,1);
+                lcd.printf("%s%d","The secret number is ",randNo);
+                score++;
+                userNumber[j] =  '\0';
+                int userint = atoi(userNumber);
+                i = -6;
+                j = -1;     
+                
+                n = userint - randNo;
+                bool flag = false;
+                for(int x = 0;x < sizeof(userNumber)/sizeof(userNumber[0]);x++){
+                    for(int y = 0;y < sizeof(letters)/sizeof(letters[0]);y++){
+                        if(userNumber[x] == letters[y]){
+                            flag = true;
+                          
+                        }    
+                       
+                    }
+                    
+                    
+                }
+                if(n == 0){
+                    if(flag == true){
+                        printf("You entered a letter, please enter a valid number\n"); 
+                    }
+                    
+                    else{
+                        
+                        printf("\nCongratulations, you have guessed %d, which is correct!!!\n",userint);
+                        printf("\nYour score is %d \n",score);
+                        
+                        srand((unsigned) time(&t));
+                        randNo = rand() % 31;
+                        score = 0;
+                        lcd.cls();
+                        lcd.locate(1,1);
+                        lcd.printf("%s%d","The secret number is ",randNo);
+                        
+                    }
+                }
+            
+                else if((n >= -4 && n <= 4) && userint <= 30){
+                    if(flag == true){
+                        printf("You entered a letter, please enter a valid number\n"); 
+                    }
+                    
+                    else{
+                        if(within(userint,randNo,n)){
+                            printf("\nYour guess is %d and you are less than 5 numbers away from the answer, keep trying!!! :\n",userint);
+                        }
+                    }
+                }
+            
+                else if((n > 4 && n <= 30) && (userint <= 30)){
+                    if(flag == true){
+                        printf("You entered a letter, please enter a valid number\n"); 
+                    }
+                    
+                    else{
+                        printf("\nYour guess is %d and this number you have guessed is too high, please try again\n",userint);
+                        
+                    }
+                }
+            
+                else if((n < -4 && n >= -30) && userint <= 30){
+                    if(flag == true){
+                        printf("You entered a letter, please enter a valid number\n"); 
+                    }
+                    
+                    else{
+                        printf("\nYour guess is %d and this number you have guessed is too low, please try again\n",userint);
+                        
+                    }
+                }
+            
+                else if(userint > 30){
+                    if(flag == true){
+                        printf("You entered a letter, please enter a valid number\n"); 
+                    }
+                    
+                    else{
+                        printf("\nYour guess is %d and this number you have selected a number higher than 30. Please enter a number from 0 to 30\n",userint);
+                        
+                    }
+                }
+                
+            
+            }
+            
+            i += 7;
+            j++;
+            
+            
+        }  
+        wait_ms(100);
+            
+            
+    }
+}
+
